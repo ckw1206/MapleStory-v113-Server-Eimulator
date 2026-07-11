@@ -10,6 +10,7 @@ wz/
 # Local config & secrets
 .env
 opencode.json
+Settings.ini
 
 # Local docs
 docs/superpowers/
