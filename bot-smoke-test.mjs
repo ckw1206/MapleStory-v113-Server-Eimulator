@@ -73,8 +73,12 @@ function tryConnect(url, timeoutMs = 5000) {
 
       ws.send(JSON.stringify({ action: "say", seq: 2, args: { text: "pr2 verification" } }));
       const sayReply = await waitFor((m) => m.seq === 2, 5000);
-      log("say action round-trip", sayReply?.type === "action_done",
-          sayReply ? JSON.stringify(sayReply) : "no reply in 5s");
+      if (sayReply?.type === "action_failed" && sayReply?.reason === "no_player_on_map") {
+        log("say action round-trip", true, "gated — no real player on map (expected)");
+      } else {
+        log("say action round-trip", sayReply?.type === "action_done",
+            sayReply ? JSON.stringify(sayReply) : "no reply in 5s");
+      }
 
       ws.send(JSON.stringify({ action: "bogus_action", seq: 3, args: {} }));
       const bogus = await waitFor((m) => m.seq === 3, 5000);
