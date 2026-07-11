@@ -1,3 +1,6 @@
 Logs/
 wz/
 *.ini
+.env
+.server.pid
+*.class
