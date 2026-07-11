@@ -36,6 +36,9 @@ public class PerceptionBuilder {
         snap.put("mp", chr.getStat().getMp());
         snap.put("maxMp", chr.getStat().getMaxMp());
         snap.put("level", bot.getLevel());
+        snap.put("name", chr.getName());
+        snap.put("job", (int) chr.getJob());
+        snap.put("mesos", chr.getMeso());
 
         JsonArray invArr = new JsonArray();
         for (MapleInventoryType invType : MapleInventoryType.values()) {

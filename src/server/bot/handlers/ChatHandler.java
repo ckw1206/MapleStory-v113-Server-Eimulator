@@ -12,6 +12,9 @@ public class ChatHandler implements BotActionHandler {
     public boolean handle(BotSession session, BotCharacter bot, String actionName, JsonObject args) {
         if (!"say".equals(actionName)) return false;
         String text = args.getString("text", "");
+        if (text.isEmpty()) return false;
+        char c0 = text.charAt(0);
+        if (c0 == '@' || c0 == '!' || c0 == '/') return false;
         if (text.length() > 70) {
             text = text.substring(0, 70);
         }
