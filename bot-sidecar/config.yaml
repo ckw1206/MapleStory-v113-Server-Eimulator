@@ -1,0 +1,11 @@
+ws_url: "ws://127.0.0.1:9999/ws?token=changeme"
+base_url: "http://localhost:11434/v1"
+api_key: "ollama"
+model: "llama3"
+brain_interval_seconds: 5
+potion_item_id: 2000002
+spawn_map_id: 100000000
+memory_window: 20
+persona:
+  name: "Buddy"
+  greeting: "Hi! I'm here to help you farm."

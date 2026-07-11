@@ -86,6 +86,7 @@ public class BotSession {
                     return;
                 }
                 BotServer.getInstance().startSnapshotBroadcaster(this);
+                BotServer.getInstance().startTouchDamageSimulator(this);
                 sendActionDone(seq, "spawn");
             } catch (Exception e) {
                 sendActionFailed(seq, "error: " + e);
@@ -129,6 +130,7 @@ public class BotSession {
                 sendActionFailed(seq, name);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             sendActionFailed(seq, "error: " + e);
         }
     }
@@ -146,6 +148,20 @@ public class BotSession {
         JsonObject msg = new JsonObject();
         msg.put("type", "snapshot");
         msg.put("data", snapshotData);
+        ctx.writeAndFlush(new TextWebSocketFrame(msg.toString()));
+    }
+
+    public void sendEvent(String eventType, JsonObject extra) {
+        JsonObject data = new JsonObject();
+        data.put("event", eventType);
+        if (extra != null) {
+            for (String key : extra.keys()) {
+                data.put(key, extra.get(key));
+            }
+        }
+        JsonObject msg = new JsonObject();
+        msg.put("type", "event");
+        msg.put("data", data);
         ctx.writeAndFlush(new TextWebSocketFrame(msg.toString()));
     }
 

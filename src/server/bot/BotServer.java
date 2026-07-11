@@ -12,6 +12,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.ReferenceCountUtil;
 import server.ServerProperties;
 import server.Timer.EtcTimer;
+import server.Timer.MobTimer;
 import server.bot.json.JsonValue;
 
 import java.net.URLDecoder;
@@ -28,6 +29,7 @@ public class BotServer {
     private EventLoopGroup bossGroup, workerGroup;
     private final ConcurrentHashMap<String, BotSession> sessions = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ScheduledFuture<?>> snapshotTimers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ScheduledFuture<?>> touchDamageTimers = new ConcurrentHashMap<>();
     private volatile boolean started;
 
     private BotServer() {}
@@ -94,6 +96,8 @@ public class BotServer {
         sessions.remove(channelId);
         ScheduledFuture<?> f = snapshotTimers.remove(channelId);
         if (f != null) f.cancel(false);
+        ScheduledFuture<?> td = touchDamageTimers.remove(channelId);
+        if (td != null) td.cancel(false);
     }
 
     public void startSnapshotBroadcaster(BotSession session) {
@@ -119,6 +123,17 @@ public class BotServer {
         }, 1000);
 
         snapshotTimers.put(id, f);
+    }
+
+    public void startTouchDamageSimulator(BotSession session) {
+        String id = session.getChannelId();
+        ScheduledFuture<?> existing = touchDamageTimers.get(id);
+        if (existing != null && !existing.isDone()) return;
+
+        TouchDamageSimulator sim = new TouchDamageSimulator(session);
+
+        ScheduledFuture<?> f = MobTimer.getInstance().register(sim, 500);
+        touchDamageTimers.put(id, f);
     }
 
     private class HandshakeValidator extends ChannelInboundHandlerAdapter {

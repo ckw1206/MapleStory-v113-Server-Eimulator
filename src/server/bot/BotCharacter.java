@@ -19,6 +19,7 @@ public class BotCharacter {
         int channel = 1;
         client.setChannel(channel);
         this.character = MapleCharacter.loadCharFromDB(botCharId, client, true);
+        client.setPlayer(character);
     }
 
     public boolean spawn(int mapId) {
@@ -62,6 +63,23 @@ public class BotCharacter {
 
     public MapleCharacter getCharacter() {
         return character;
+    }
+
+    public int damage(int amount) {
+        int currentHp = character.getStat().getHp();
+        int actual = Math.min(amount, currentHp);
+        if (actual > 0) {
+            character.addHP(-actual);
+        }
+        return actual;
+    }
+
+    public int getHp() {
+        return character.getStat().getHp();
+    }
+
+    public int getMaxHp() {
+        return character.getStat().getMaxHp();
     }
 
     public void despawn() {
