@@ -21,14 +21,21 @@ public class BotCharacter {
         this.character = MapleCharacter.loadCharFromDB(botCharId, client, true);
     }
 
-    public void spawn(int mapId) {
+    public boolean spawn(int mapId) {
+        if (character.getMap() != null) {
+            despawn();
+        }
         ChannelServer cs = ChannelServer.getInstance(client.getChannel());
         MapleMapFactory mf = cs.getMapFactory();
         MapleMap map = mf.getMap(mapId);
+        if (map == null) {
+            return false;
+        }
         MaplePortal sp = map.getPortal(0);
         character.setMap(map);
         character.setPosition(sp.getPosition());
         map.addPlayer(character);
+        return true;
     }
 
     public void moveTo(int x, int y) {
@@ -43,22 +50,11 @@ public class BotCharacter {
         return character.getMap();
     }
 
-    public int damage(int amount) {
-        int currentHp = character.getStat().getHp();
-        int actual = Math.min(amount, currentHp);
-        character.addHP(-actual);
-        return actual;
-    }
-
-    public int getHpPercent() {
-        int hp = character.getStat().getHp();
-        int maxHp = character.getStat().getMaxHp();
-        return maxHp == 0 ? 100 : hp * 100 / maxHp;
-    }
-
     public int getLevel() {
         return character.getLevel();
     }
+
+    public boolean isLoaded() { return character != null; }
 
     public int getId() {
         return character.getId();

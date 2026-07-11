@@ -17,7 +17,4 @@ public class ChatHandler implements BotActionHandler {
                 bot.getPosition());
         return true;
     }
-
-    @Override
-    public String getCapabilityName() { return "chat"; }
 }

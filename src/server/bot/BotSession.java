@@ -65,10 +65,22 @@ public class BotSession {
             if (bot == null) {
                 int charId = ServerProperties.getBotCharacterId();
                 bot = new BotCharacter(charId);
+                if (!bot.isLoaded()) {
+                    bot = null;
+                    sendActionFailed(seq, "char_load_failed");
+                    return;
+                }
             }
-            bot.spawn(mapId);
-            BotServer.getInstance().startSnapshotBroadcaster(this);
-            sendActionDone(seq, "spawn");
+            try {
+                if (!bot.spawn(mapId)) {
+                    sendActionFailed(seq, "bad_mapId");
+                    return;
+                }
+                BotServer.getInstance().startSnapshotBroadcaster(this);
+                sendActionDone(seq, "spawn");
+            } catch (Exception e) {
+                sendActionFailed(seq, "error: " + e);
+            }
             return;
         }
 
@@ -100,9 +112,15 @@ public class BotSession {
         }
 
         BotActionHandler h = capabilities.get(capKey);
-        boolean ok = h.handle(this, bot, name, args);
-        if (ok) {
-            sendActionDone(seq, name);
+        try {
+            boolean ok = h.handle(this, bot, name, args);
+            if (ok) {
+                sendActionDone(seq, name);
+            } else {
+                sendActionFailed(seq, name);
+            }
+        } catch (Exception e) {
+            sendActionFailed(seq, "error: " + e);
         }
     }
 
@@ -119,20 +137,6 @@ public class BotSession {
         JsonObject msg = new JsonObject();
         msg.put("type", "snapshot");
         msg.put("data", snapshotData);
-        ctx.writeAndFlush(new TextWebSocketFrame(msg.toString()));
-    }
-
-    public void sendEvent(String eventType, JsonObject data) {
-        JsonObject msg = new JsonObject();
-        msg.put("type", "event");
-        JsonObject outer = new JsonObject();
-        outer.put("event", eventType);
-        if (data != null) {
-            for (String k : data.keys()) {
-                outer.put(k, data.get(k));
-            }
-        }
-        msg.put("data", outer);
         ctx.writeAndFlush(new TextWebSocketFrame(msg.toString()));
     }
 

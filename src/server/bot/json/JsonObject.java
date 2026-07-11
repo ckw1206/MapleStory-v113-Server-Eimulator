@@ -1,6 +1,5 @@
 /*
- * Minimal JSON — MIT License
- * https://github.com/ralfstx/minimal-json
+ * Minimal JSON object — original implementation for bot API use.
  */
 package server.bot.json;
 

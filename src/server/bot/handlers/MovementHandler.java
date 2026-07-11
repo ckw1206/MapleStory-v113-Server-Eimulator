@@ -24,7 +24,4 @@ public class MovementHandler implements BotActionHandler {
         }
         return false;
     }
-
-    @Override
-    public String getCapabilityName() { return "movement"; }
 }

@@ -79,7 +79,4 @@ public class LootHandler implements BotActionHandler {
 
         return true;
     }
-
-    @Override
-    public String getCapabilityName() { return "loot"; }
 }

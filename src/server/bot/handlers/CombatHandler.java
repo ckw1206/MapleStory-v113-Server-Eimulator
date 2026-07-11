@@ -30,7 +30,4 @@ public class CombatHandler implements BotActionHandler {
         mob.damage(bot.getCharacter(), damage, true);
         return true;
     }
-
-    @Override
-    public String getCapabilityName() { return "combat"; }
 }

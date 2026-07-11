@@ -50,13 +50,14 @@ public class BotServer {
                     pipe.addLast("http-codec", new HttpServerCodec());
                     pipe.addLast("aggregator", new HttpObjectAggregator(65536));
                     pipe.addLast("handshake-check", new HandshakeValidator());
-                    pipe.addLast("ws-protocol", new WebSocketServerProtocolHandler("/ws", null, true));
+                    pipe.addLast("ws-protocol", new WebSocketServerProtocolHandler("/ws", null, true, 65536, false, true));
                     pipe.addLast("session-handler", new BotSessionHandler());
                 }
             });
 
         Channel ch;
         try {
+            // binds all interfaces because docker port-mapping needs it; token auth is the boundary
             ch = bootstrap.bind(port).sync().channel();
             started = true;
             System.out.println("Bot WS server listening on port " + port);
@@ -160,14 +161,15 @@ public class BotServer {
 
         @Override
         public void handlerRemoved(ChannelHandlerContext ctx) {
-            BotSession session = sessions.remove(ctx.channel().id().asLongText());
+            String channelId = ctx.channel().id().asLongText();
+            BotSession session = sessions.get(channelId);
+            removeSession(channelId);
             if (session != null) session.onDisconnect();
         }
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            BotSession session = sessions.get(ctx.channel().id().asLongText());
-            if (session != null) session.onDisconnect();
+            cause.printStackTrace();
             ctx.channel().close();
         }
 
