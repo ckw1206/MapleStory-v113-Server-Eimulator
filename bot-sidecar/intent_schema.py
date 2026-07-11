@@ -39,6 +39,10 @@ def validate_response(response) -> Dict[str, Any]:
         if func.name != "bot_action":
             raise ValidationError(f"unexpected function name: {func.name}")
         args = _parse_args(func.arguments)
+        if "args" not in args:
+            args["args"] = {}
+        elif not isinstance(args["args"], dict):
+            raise ValidationError("args is not a dict")
         action = args.get("action")
         if action not in VALID_ACTIONS:
             raise ValidationError(f"invalid action: {action}")

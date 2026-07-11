@@ -32,7 +32,7 @@ public class JsonObject extends JsonValue {
 
     public void put(String key, JsonValue value)            { map.put(key, value); }
     public void put(String key, String value)               { map.put(key, JsonValue.string(value)); }
-    public void put(String key, int value)                  { map.put(key, JsonValue.number(value)); }
+    public void put(String key, int value)                  { map.put(key, JsonValue.number((long) value)); }
     public void put(String key, long value)                 { map.put(key, JsonValue.number(value)); }
     public void put(String key, boolean value)              { map.put(key, value ? JsonValue.TRUE : JsonValue.FALSE); }
 

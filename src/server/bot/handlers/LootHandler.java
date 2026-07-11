@@ -4,6 +4,7 @@ import client.MapleCharacter;
 import client.inventory.IItem;
 import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
+import java.util.concurrent.locks.Lock;
 import server.MapleInventoryManipulator;
 import server.MapleItemInformationProvider;
 import server.MapleStatEffect;
@@ -34,21 +35,28 @@ public class LootHandler implements BotActionHandler {
 
         MapleMapObject itemObj = bot.getMap().getMapObject(dropOid, MapleMapObjectType.ITEM);
         if (!(itemObj instanceof MapleMapItem)) return false;
-        MapleMapItem item = (MapleMapItem) itemObj;
-        if (item.isPickedUp()) return false;
-        if (item.getOwner() != 0 && item.getOwner() != bot.getId()) return false;
+        final MapleMapItem item = (MapleMapItem) itemObj;
+        final Lock lock = item.getLock();
+        lock.lock();
+        try {
+            if (item.isPickedUp()) return false;
+            if (item.getOwner() != 0 && item.getOwner() != bot.getId()) return false;
 
-        IItem itemData = item.getItem();
-        if (itemData == null) return false;
+            IItem itemData = item.getItem();
+            if (itemData == null) return false;
 
-        boolean added = MapleInventoryManipulator.addFromDrop(bot.getCharacter().getClient(), itemData, false);
-        if (added) {
-            bot.getMap().broadcastMessage(
-                    MaplePacketCreator.removeItemFromMap(item.getObjectId(), 2, bot.getId()),
-                    item.getPosition());
-            bot.getMap().removeMapObject(item);
+            boolean added = MapleInventoryManipulator.addFromDrop(bot.getCharacter().getClient(), itemData, false);
+            if (added) {
+                item.setPickedUp(true);
+                bot.getMap().broadcastMessage(
+                        MaplePacketCreator.removeItemFromMap(item.getObjectId(), 2, bot.getId()),
+                        item.getPosition());
+                bot.getMap().removeMapObject(item);
+            }
+            return added;
+        } finally {
+            lock.unlock();
         }
-        return added;
     }
 
     private boolean handleUseItem(BotCharacter bot, JsonObject args) {

@@ -13,12 +13,15 @@ import server.bot.json.JsonValue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BotSession {
 
+    private static final AtomicBoolean BOT_IN_USE = new AtomicBoolean(false);
+
     private final Channel ctx;
     private final String channelId;
-    private BotCharacter bot;
+    private volatile BotCharacter bot;
     private final Map<String, BotActionHandler> capabilities;
 
     public BotSession(Channel ctx) {
@@ -65,23 +68,31 @@ public class BotSession {
                 return;
             }
             if (bot == null) {
+                if (!BOT_IN_USE.compareAndSet(false, true)) {
+                    sendActionFailed(seq, "bot_in_use");
+                    return;
+                }
                 try {
                     int charId = ServerProperties.getBotCharacterId();
                     bot = new BotCharacter(charId);
                     if (!bot.isLoaded()) {
                         bot = null;
+                        BOT_IN_USE.set(false);
                         sendActionFailed(seq, "char_load_failed");
                         return;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                     bot = null;
+                    BOT_IN_USE.set(false);
                     sendActionFailed(seq, "char_load_failed");
                     return;
                 }
             }
             try {
                 if (!bot.spawn(mapId)) {
+                    BOT_IN_USE.set(false);
+                    bot = null;
                     sendActionFailed(seq, "bad_mapId");
                     return;
                 }
@@ -89,6 +100,9 @@ public class BotSession {
                 BotServer.getInstance().startTouchDamageSimulator(this);
                 sendActionDone(seq, "spawn");
             } catch (Exception e) {
+                try { bot.despawn(); } catch (Exception ignored) {}
+                bot = null;
+                BOT_IN_USE.set(false);
                 sendActionFailed(seq, "error: " + e);
             }
             return;
@@ -139,6 +153,7 @@ public class BotSession {
         if (bot != null) {
             bot.despawn();
             bot = null;
+            BOT_IN_USE.set(false);
         }
     }
 

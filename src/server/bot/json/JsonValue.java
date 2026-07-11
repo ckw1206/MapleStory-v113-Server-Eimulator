@@ -132,6 +132,7 @@ public abstract class JsonValue {
 
     public static JsonValue string(String s)              { return new JsonString(s); }
     public static JsonValue number(double v)              { return new JsonNumber(v, String.valueOf(v)); }
+    public static JsonValue number(long v)                { return new JsonNumber(v, Long.toString(v)); }
     public static JsonValue number(String raw)            { return new JsonNumber(Double.parseDouble(raw), raw); }
     public static JsonValue object(java.util.Map<String, JsonValue> m) { return new JsonObject(m); }
     public static JsonValue array(java.util.List<JsonValue> l)          { return new JsonArray(l); }

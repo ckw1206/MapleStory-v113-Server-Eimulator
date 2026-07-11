@@ -48,3 +48,18 @@ def test_no_tool_calls_raises():
 def test_valid_actions_cover_all_non_spawn():
     expected = {"move_to", "attack", "pickup", "use_item", "say", "face", "idle"}
     assert VALID_ACTIONS == expected
+
+
+def test_missing_args_defaults_to_empty_dict():
+    response = _make_response("idle", None)
+    response.choices[0].message.tool_calls[0].function.arguments = '{"action":"idle"}'
+    result = validate_response(response)
+    assert result["args"] == {}
+
+
+def test_args_present_but_not_dict_raises():
+    response = _make_response("idle", None)
+    response.choices[0].message.tool_calls[0].function.arguments = '{"action":"idle","args":123}'
+    with pytest.raises(ValidationError) as exc:
+        validate_response(response)
+    assert "not a dict" in str(exc.value)

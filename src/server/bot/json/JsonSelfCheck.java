@@ -3,6 +3,14 @@ package server.bot.json;
 public class JsonSelfCheck {
 
     public static void main(String[] args) {
+        JsonObject intTest = new JsonObject();
+        intTest.put("seq", 42);
+        String intJson = intTest.toString();
+        if (intJson.contains("42.0")) {
+            System.out.println("FAIL: int serialized as 42.0");
+            System.exit(1);
+        }
+
         String json = "{" +
             "\"obj\":{\"key\":\"val\"}," +
             "\"arr\":[1,2,3]," +

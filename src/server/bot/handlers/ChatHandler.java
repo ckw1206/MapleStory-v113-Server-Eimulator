@@ -12,6 +12,9 @@ public class ChatHandler implements BotActionHandler {
     public boolean handle(BotSession session, BotCharacter bot, String actionName, JsonObject args) {
         if (!"say".equals(actionName)) return false;
         String text = args.getString("text", "");
+        if (text.length() > 70) {
+            text = text.substring(0, 70);
+        }
         bot.getCharacter().getMap().broadcastMessage(
                 MaplePacketCreator.getChatText(bot.getId(), text, false, 0),
                 bot.getPosition());
