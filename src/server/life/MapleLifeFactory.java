@@ -36,6 +36,7 @@ import provider.MapleDataTool;
 import provider.WzXML.MapleDataType;
 import tools.Pair;
 import tools.StringUtil;
+import server.bot.MobPADamage;
 
 public class MapleLifeFactory {
 
@@ -258,5 +259,9 @@ public class MapleLifeFactory {
             return null;
         }
         return new MapleNPC(nid, name);
+    }
+
+    public static int getPADamage(int mobId, int level) {
+        return MobPADamage.getPADamage(mobId, level);
     }
 }
