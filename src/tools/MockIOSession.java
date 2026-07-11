@@ -29,9 +29,11 @@ import io.netty.channel.ChannelMetadata;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.ChannelProgressivePromise;
 import io.netty.channel.ChannelPromise;
+import io.netty.channel.DefaultChannelPromise;
 import io.netty.channel.EventLoop;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import java.net.SocketAddress;
 
 /**
@@ -70,7 +72,7 @@ public class MockIOSession implements Channel {
 
     @Override
     public boolean isOpen() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return true;
     }
 
     @Override
@@ -80,7 +82,7 @@ public class MockIOSession implements Channel {
 
     @Override
     public boolean isActive() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return true;
     }
 
     @Override
@@ -105,7 +107,7 @@ public class MockIOSession implements Channel {
 
     @Override
     public boolean isWritable() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return true;
     }
 
     @Override
@@ -130,7 +132,7 @@ public class MockIOSession implements Channel {
 
     @Override
     public Channel flush() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this;
     }
 
     @Override
@@ -205,22 +207,24 @@ public class MockIOSession implements Channel {
 
     @Override
     public ChannelFuture write(Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new DefaultChannelPromise(this, GlobalEventExecutor.INSTANCE).setSuccess();
     }
 
     @Override
     public ChannelFuture write(Object o, ChannelPromise cp) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        cp.trySuccess();
+        return cp;
     }
 
     @Override
     public ChannelFuture writeAndFlush(Object o, ChannelPromise cp) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        cp.trySuccess();
+        return cp;
     }
 
     @Override
     public ChannelFuture writeAndFlush(Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new DefaultChannelPromise(this, GlobalEventExecutor.INSTANCE).setSuccess();
     }
 
     @Override

@@ -39,6 +39,8 @@ public class BotSession {
         try {
             action = (JsonObject) JsonParser.parse(text);
         } catch (Exception e) {
+            // seq 0 is reserved for replies where the request seq could not be parsed;
+            // clients must use seq >= 1
             sendActionFailed(0, "malformed_json");
             return;
         }
@@ -63,9 +65,16 @@ public class BotSession {
                 return;
             }
             if (bot == null) {
-                int charId = ServerProperties.getBotCharacterId();
-                bot = new BotCharacter(charId);
-                if (!bot.isLoaded()) {
+                try {
+                    int charId = ServerProperties.getBotCharacterId();
+                    bot = new BotCharacter(charId);
+                    if (!bot.isLoaded()) {
+                        bot = null;
+                        sendActionFailed(seq, "char_load_failed");
+                        return;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                     bot = null;
                     sendActionFailed(seq, "char_load_failed");
                     return;

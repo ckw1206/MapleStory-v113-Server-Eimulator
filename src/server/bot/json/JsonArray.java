@@ -21,6 +21,7 @@ public class JsonArray extends JsonValue {
     public JsonValue get(int index) { return list.get(index); }
     public int size()               { return list.size(); }
     public List<JsonValue> getList() { return list; }
+    public void add(JsonValue v) { list.add(v); }
 
     @Override protected void writeTo(StringBuilder sb) {
         sb.append('[');

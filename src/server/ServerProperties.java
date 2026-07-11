@@ -55,14 +55,17 @@ public class ServerProperties {
     }
 
     public static int getBotPort() {
-        return Integer.valueOf(props.getProperty("tms.BotPort", "9999"));
+        return Integer.valueOf(props.getProperty("tms.BotPort", "9999").trim());
     }
 
     public static String getBotToken() {
-        return props.getProperty("tms.BotToken");
+        String v = props.getProperty("tms.BotToken");
+        if (v == null) return null;
+        v = v.trim();
+        return v.isEmpty() ? null : v;
     }
 
     public static int getBotCharacterId() {
-        return Integer.valueOf(props.getProperty("tms.BotCharacterId", "1"));
+        return Integer.valueOf(props.getProperty("tms.BotCharacterId", "1").trim());
     }
 }

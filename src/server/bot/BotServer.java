@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.util.ReferenceCountUtil;
 import server.ServerProperties;
 import server.Timer.EtcTimer;
 import server.bot.json.JsonValue;
@@ -122,41 +123,44 @@ public class BotServer {
 
     private class HandshakeValidator extends ChannelInboundHandlerAdapter {
         @Override
-        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-            if (evt instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
-                WebSocketServerProtocolHandler.HandshakeComplete hs =
-                        (WebSocketServerProtocolHandler.HandshakeComplete) evt;
-                String query = hs.requestUri();
-                String expectedToken = ServerProperties.getBotToken();
-                if (expectedToken == null) {
-                    ctx.channel().close();
-                    return;
-                }
-                String providedToken = null;
-                if (query != null && query.indexOf('?') >= 0) {
-                    String qs = query.substring(query.indexOf('?') + 1);
-                    for (String param : qs.split("&")) {
-                        int eq = param.indexOf('=');
-                        if (eq > 0 && "token".equals(param.substring(0, eq))) {
-                            providedToken = URLDecoder.decode(param.substring(eq + 1), "UTF-8");
-                            break;
-                        }
+        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+            if (!(msg instanceof FullHttpRequest)) {
+                ctx.fireChannelRead(msg);
+                return;
+            }
+            FullHttpRequest req = (FullHttpRequest) msg;
+            String expectedToken = ServerProperties.getBotToken();
+            String providedToken = null;
+            String uri = req.uri();
+            if (uri != null && uri.indexOf('?') >= 0) {
+                String qs = uri.substring(uri.indexOf('?') + 1);
+                for (String param : qs.split("&")) {
+                    int eq = param.indexOf('=');
+                    if (eq > 0 && "token".equals(param.substring(0, eq))) {
+                        providedToken = URLDecoder.decode(param.substring(eq + 1), "UTF-8");
+                        break;
                     }
                 }
-                if (!expectedToken.equals(providedToken)) {
-                    ctx.channel().close();
-                    return;
-                }
             }
-            ctx.fireUserEventTriggered(evt);
+            if (expectedToken == null || expectedToken.isEmpty() || !expectedToken.equals(providedToken)) {
+                FullHttpResponse res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
+                res.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.CLOSE);
+                ctx.writeAndFlush(res).addListener(ChannelFutureListener.CLOSE);
+                ReferenceCountUtil.release(msg);
+                return;
+            }
+            ctx.fireChannelRead(msg);
         }
     }
 
     private class BotSessionHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
         @Override
-        public void handlerAdded(ChannelHandlerContext ctx) {
-            BotSession session = new BotSession(ctx.channel());
-            registerSession(ctx.channel().id().asLongText(), session);
+        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+            if (evt instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
+                BotSession session = new BotSession(ctx.channel());
+                registerSession(ctx.channel().id().asLongText(), session);
+            }
+            ctx.fireUserEventTriggered(evt);
         }
 
         @Override

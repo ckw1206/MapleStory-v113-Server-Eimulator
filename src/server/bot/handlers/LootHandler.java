@@ -59,6 +59,7 @@ public class LootHandler implements BotActionHandler {
         byte invTypeByte = (byte) (itemId / 1000000);
         MapleInventoryType invType = MapleInventoryType.getByType(invTypeByte);
         if (invType == null) return false;
+        if (invType != MapleInventoryType.USE) return false;
 
         MapleInventory inv = chr.getInventory(invType);
         IItem found = null;

@@ -24,6 +24,7 @@ public class CombatHandler implements BotActionHandler {
 
         if (!mob.isAlive()) return false;
 
+        // Test-harness capability, not a simulated legit player: no range/aggro/skill checks
         float maxBase = bot.getCharacter().getStat().getCurrentMaxBaseDamage();
         int damage = Math.max(1, (int) maxBase + Randomizer.nextInt(Math.max(1, (int) (maxBase / 10))));
 

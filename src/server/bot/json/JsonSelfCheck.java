@@ -20,6 +20,23 @@ public class JsonSelfCheck {
             System.out.println("FAIL");
             System.exit(1);
         }
+
+        try {
+            JsonParser.parse("{\"action\":");
+            System.out.println("FAIL: truncated input 1 should throw");
+            System.exit(1);
+        } catch (RuntimeException e) {
+            // expected
+        }
+
+        try {
+            JsonParser.parse("{");
+            System.out.println("FAIL: truncated input 2 should throw");
+            System.exit(1);
+        } catch (RuntimeException e) {
+            // expected
+        }
+
         System.out.println("OK");
     }
 

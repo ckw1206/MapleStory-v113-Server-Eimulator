@@ -22,8 +22,14 @@ public class JsonParser {
         return new JsonParser(s).parseValue();
     }
 
-    private char peek() { return s.charAt(pos); }
-    private char next() { return s.charAt(pos++); }
+    private char peek() {
+        if (pos >= s.length()) throw new RuntimeException("Unexpected end of JSON at " + pos);
+        return s.charAt(pos);
+    }
+    private char next() {
+        if (pos >= s.length()) throw new RuntimeException("Unexpected end of JSON at " + pos);
+        return s.charAt(pos++);
+    }
     private boolean hasMore() { return pos < s.length(); }
 
     private JsonValue parseValue() {
@@ -105,6 +111,7 @@ public class JsonParser {
                     case 'r':  sb.append('\r'); break;
                     case 't':  sb.append('\t'); break;
                     case 'u':
+                        if (pos + 4 > s.length()) throw new RuntimeException("Unexpected end of JSON at " + pos);
                         sb.append((char) Integer.parseInt(s.substring(pos, pos + 4), 16));
                         pos += 4;
                         break;

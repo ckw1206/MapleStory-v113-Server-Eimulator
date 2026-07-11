@@ -45,7 +45,7 @@ public class PerceptionBuilder {
                 itemObj.put("type", invType.name());
                 itemObj.put("id", item.getItemId());
                 itemObj.put("qty", item.getQuantity());
-                invArr.getList().add(itemObj);
+                invArr.add(itemObj);
             }
         }
         snap.put("inventorySummary", invArr);
@@ -55,6 +55,7 @@ public class PerceptionBuilder {
                 Collections.singletonList(MapleMapObjectType.MONSTER));
         JsonArray mobsArr = new JsonArray();
         for (MapleMapObject mo : mobs) {
+            if (mobsArr.size() >= 64) break; // cap at 64
             MapleMonster mob = (MapleMonster) mo;
             if (!mob.isAlive()) continue;
             JsonObject mobObj = new JsonObject();
@@ -64,7 +65,7 @@ public class PerceptionBuilder {
             mobObj.put("y", (int) mob.getPosition().getY());
             double hpPct = mob.getHp() * 100.0 / mob.getMobMaxHp();
             mobObj.put("hpPct", (int) hpPct);
-            mobsArr.getList().add(mobObj);
+            mobsArr.add(mobObj);
         }
         snap.put("mobs", mobsArr);
 
@@ -73,6 +74,7 @@ public class PerceptionBuilder {
                 Collections.singletonList(MapleMapObjectType.ITEM));
         JsonArray dropsArr = new JsonArray();
         for (MapleMapObject mo : drops) {
+            if (dropsArr.size() >= 64) break; // cap at 64
             MapleMapItem drop = (MapleMapItem) mo;
             if (drop.isPickedUp()) continue;
             JsonObject dropObj = new JsonObject();
@@ -80,13 +82,14 @@ public class PerceptionBuilder {
             dropObj.put("itemId", drop.getItem().getItemId());
             dropObj.put("x", (int) drop.getPosition().getX());
             dropObj.put("y", (int) drop.getPosition().getY());
-            dropsArr.getList().add(dropObj);
+            dropsArr.add(dropObj);
         }
         snap.put("drops", dropsArr);
 
         Collection<MapleCharacter> players = map.getCharacters();
         JsonArray playersArr = new JsonArray();
         for (MapleCharacter p : players) {
+            if (playersArr.size() >= 64) break; // cap at 64
             if (p.isClone() || p.isHidden()) continue;
             if (p.getId() == bot.getId()) continue;
             JsonObject pObj = new JsonObject();
@@ -94,7 +97,7 @@ public class PerceptionBuilder {
             pObj.put("name", p.getName());
             pObj.put("x", (int) p.getPosition().getX());
             pObj.put("y", (int) p.getPosition().getY());
-            playersArr.getList().add(pObj);
+            playersArr.add(pObj);
         }
         snap.put("players", playersArr);
 
@@ -104,7 +107,7 @@ public class PerceptionBuilder {
             pObj.put("name", p.getName());
             pObj.put("x", (int) p.getPosition().getX());
             pObj.put("y", (int) p.getPosition().getY());
-            portalsArr.getList().add(pObj);
+            portalsArr.add(pObj);
         }
         snap.put("portals", portalsArr);
 
