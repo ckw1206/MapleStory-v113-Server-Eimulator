@@ -1,6 +1,15 @@
+# Compiled output
+*.class
+
+# Runtime data
 Logs/
 wz/
 *.ini
-.env
 .server.pid
-*.class
+
+# Local config & secrets
+.env
+opencode.json
+
+# Local docs
+docs/superpowers/
