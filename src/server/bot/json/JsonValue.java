@@ -1,7 +1,7 @@
 /*
  * Minimal JSON parser — MIT License
  * https://github.com/ralfstx/minimal-json
- * Ported to single-filevendored form for bot API use.
+ * Ported to single-file vendored form for bot API use.
  */
 package server.bot.json;
 
@@ -64,7 +64,7 @@ public abstract class JsonValue {
 
     // Concrete type classes
 
-    public static final class JsonNumber extends JsonValue {
+    private static final class JsonNumber extends JsonValue {
         private final double value;
         private final String raw;
 
@@ -81,7 +81,7 @@ public abstract class JsonValue {
         @Override protected void writeTo(StringBuilder sb) { sb.append(raw); }
     }
 
-    public static final class JsonString extends JsonValue {
+    private static final class JsonString extends JsonValue {
         private final String value;
 
         public JsonString(String value) {
@@ -119,61 +119,7 @@ public abstract class JsonValue {
         }
     }
 
-    public static final class JsonObject extends JsonValue {
-        private final java.util.Map<String, JsonValue> map;
-
-        public JsonObject(java.util.Map<String, JsonValue> map) {
-            super(Type.T_OBJECT);
-            this.map = map;
-        }
-
-        public JsonValue get(String key)                       { return map.get(key); }
-        public String    getString(String key)                 { JsonValue v = map.get(key); return v == null ? null : v.getString(); }
-        public String    getString(String key, String def)     { JsonValue v = map.get(key); return v != null && v.isString() ? v.getString() : def; }
-        public int       getInt(String key, int def)           { JsonValue v = map.get(key); return v != null && v.isNumber() ? v.getInt() : def; }
-        public long      getLong(String key, long def)         { JsonValue v = map.get(key); return v != null && v.isNumber() ? v.getLong() : def; }
-        public boolean   getBoolean(String key, boolean def)   { JsonValue v = map.get(key); return v != null && v.isBoolean() ? v.getBoolean() : def; }
-        public JsonObject getJsonObject(String key)            { JsonValue v = map.get(key); return v != null && v.isObject() ? v.getObject() : null; }
-        public JsonArray  getJsonArray(String key)             { JsonValue v = map.get(key); return v != null && v.isArray() ? v.getArray() : null; }
-        public int       size()                                { return map.size(); }
-        public boolean   containsKey(String key)               { return map.containsKey(key); }
-        public Iterable<String> keys()                         { return map.keySet(); }
-
-        @Override protected void writeTo(StringBuilder sb) {
-            sb.append('{');
-            boolean first = true;
-            for (java.util.Map.Entry<String, JsonValue> e : map.entrySet()) {
-                if (!first) sb.append(',');
-                first = false;
-                sb.append('"').append(e.getKey()).append("\":");
-                e.getValue().writeTo(sb);
-            }
-            sb.append('}');
-        }
-    }
-
-    public static final class JsonArray extends JsonValue {
-        private final java.util.List<JsonValue> list;
-
-        public JsonArray(java.util.List<JsonValue> list) {
-            super(Type.T_ARRAY);
-            this.list = list;
-        }
-
-        public JsonValue get(int index) { return list.get(index); }
-        public int size()               { return list.size(); }
-
-        @Override protected void writeTo(StringBuilder sb) {
-            sb.append('[');
-            for (int i = 0; i < list.size(); i++) {
-                if (i > 0) sb.append(',');
-                list.get(i).writeTo(sb);
-            }
-            sb.append(']');
-        }
-    }
-
-    public static final class JsonBoolean extends JsonValue {
+    private static final class JsonBoolean extends JsonValue {
         private final boolean value;
         private JsonBoolean(Type type, boolean value) { super(type); this.value = value; }
         @Override public boolean getBoolean() { return value; }
@@ -186,11 +132,9 @@ public abstract class JsonValue {
         @Override protected void writeTo(StringBuilder sb) { sb.append("null"); }
     };
 
-    public static JsonValue string(String s)  { return new JsonString(s); }
-    public static JsonValue number(double v)  { return new JsonNumber(v, String.valueOf(v)); }
-    public static JsonValue number(String raw) {
-        return new JsonNumber(Double.parseDouble(raw), raw);
-    }
+    public static JsonValue string(String s)              { return new JsonString(s); }
+    public static JsonValue number(double v)              { return new JsonNumber(v, String.valueOf(v)); }
+    public static JsonValue number(String raw)            { return new JsonNumber(Double.parseDouble(raw), raw); }
     public static JsonValue object(java.util.Map<String, JsonValue> m) { return new JsonObject(m); }
-    public static JsonValue array(java.util.List<JsonValue> l)         { return new JsonArray(l); }
+    public static JsonValue array(java.util.List<JsonValue> l)          { return new JsonArray(l); }
 }
