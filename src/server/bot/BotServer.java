@@ -13,6 +13,8 @@ import io.netty.util.ReferenceCountUtil;
 import server.ServerProperties;
 import server.Timer.EtcTimer;
 import server.Timer.MobTimer;
+import client.MapleCharacter;
+import server.bot.json.JsonObject;
 import server.bot.json.JsonValue;
 
 import java.net.URLDecoder;
@@ -123,6 +125,24 @@ public class BotServer {
         }, 1000);
 
         snapshotTimers.put(id, f);
+    }
+
+    public void onPlayerChat(MapleCharacter chr, String text) {
+        if (!started) return;
+        for (BotSession s : sessions.values()) {
+            try {
+                BotCharacter bot = s.getBot();
+                if (bot == null || bot.getMap() == null) continue;
+                if (bot.getMap() != chr.getMap()) continue;
+                if (chr.getId() == bot.getId()) continue;
+                JsonObject data = new JsonObject();
+                data.put("senderId", chr.getId());
+                data.put("senderName", chr.getName());
+                data.put("text", text);
+                s.sendEvent("chat", data);
+            } catch (Exception e) {
+            }
+        }
     }
 
     public void startTouchDamageSimulator(BotSession session) {

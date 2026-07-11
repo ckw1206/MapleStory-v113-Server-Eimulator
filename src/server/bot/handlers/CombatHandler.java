@@ -29,6 +29,12 @@ public class CombatHandler implements BotActionHandler {
         int damage = Math.max(1, (int) maxBase + Randomizer.nextInt(Math.max(1, (int) (maxBase / 10))));
 
         mob.damage(bot.getCharacter(), damage, true);
+        if (!mob.isAlive()) {
+            JsonObject data = new JsonObject();
+            data.put("oid", mobOid);
+            data.put("mobId", mob.getId());
+            session.sendEvent("mob_killed", data);
+        }
         return true;
     }
 }

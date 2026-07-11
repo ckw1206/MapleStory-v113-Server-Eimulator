@@ -45,6 +45,7 @@ public class ChatHandler {
                 } else {
                     chr.getCheatTracker().checkMsg();
                     chr.getMap().broadcastMessage(MaplePacketCreator.getChatText(chr.getId(), text, c.getPlayer().isGM(), unk), c.getPlayer().getPosition());
+                    server.bot.BotServer.getInstance().onPlayerChat(chr, text);
                 }
                 /*if (text.equalsIgnoreCase(c.getChannelServer().getServerName() + " rocks")) {
                  chr.finishAchievement(11);

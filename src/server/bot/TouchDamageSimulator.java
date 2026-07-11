@@ -76,6 +76,8 @@ public class TouchDamageSimulator implements Runnable {
 
             if (actual > 0) {
                 JsonObject extra = new JsonObject();
+                extra.put("damage", actual);
+                extra.put("mobId", mob.getId());
                 extra.put("hp", bot.getHp());
                 extra.put("maxHp", bot.getMaxHp());
                 session.sendEvent("damaged", extra);
