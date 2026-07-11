@@ -1,0 +1,49 @@
+services:
+  mysql:
+    # 5.7, not 8.0: dist/ ships mysql-connector-java 5.1.12, which predates MySQL 8
+    # support (first compatible release was 5.1.46). 5.7 also matches the big5-era dump.
+    image: mysql:5.7
+    container_name: e113-mysql
+    restart: unless-stopped
+    command: --character-set-server=big5 --collation-server=big5_chinese_ci --sql-mode=ONLY_FULL_GROUP_BY,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changeme}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-e113}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # e113.sql creates the schema and must load before the alter/insert scripts below
+      - ./sql/e113.sql:/docker-entrypoint-initdb.d/01-e113.sql:ro
+      - ./sql/autoPotion.sql:/docker-entrypoint-initdb.d/02-autoPotion.sql:ro
+      - ./sql/beginnerDrop.sql:/docker-entrypoint-initdb.d/03-beginnerDrop.sql:ro
+      - ./sql/optimizeCashShop.sql:/docker-entrypoint-initdb.d/04-optimizeCashShop.sql:ro
+      - ./sql/reborn.sql:/docker-entrypoint-initdb.d/05-reborn.sql:ro
+      - ./sql/shopItemPrice.sql:/docker-entrypoint-initdb.d/06-shopItemPrice.sql:ro
+      - ./sql/subjob.sql:/docker-entrypoint-initdb.d/07-subjob.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-changeme}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build: .
+    container_name: e113-server
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./wz:/app/wz:ro
+      # Libs holds runtime data the server reads by relative path: packet opcodes
+      # (Libs/opcode/*.ini) and every NPC/portal/quest/event/reactor script.
+      - ./Libs:/app/Libs:ro
+      - ./Settings.ini:/app/Settings.ini:ro
+      - ./Logs:/app/Logs
+    ports:
+      - "8484:8484"
+      - "8585-8604:8585-8604"
+
+volumes:
+  mysql-data:

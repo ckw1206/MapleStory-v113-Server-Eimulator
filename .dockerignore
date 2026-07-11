@@ -1,0 +1,8 @@
+wz/
+Logs/
+Libs/
+sql/
+.git/
+.env
+Settings.ini
+*.class
