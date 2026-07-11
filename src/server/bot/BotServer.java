@@ -16,6 +16,7 @@ import server.Timer.MobTimer;
 import client.MapleCharacter;
 import server.bot.json.JsonObject;
 import server.bot.json.JsonValue;
+import server.maps.MapleMap;
 
 import java.net.URLDecoder;
 import java.util.concurrent.ConcurrentHashMap;
@@ -143,6 +144,15 @@ public class BotServer {
             } catch (Exception e) {
             }
         }
+    }
+
+    public static boolean hasRealPlayer(MapleMap map, int botId) {
+        for (client.MapleCharacter p : map.getCharacters()) {
+            if (p.isClone() || p.isHidden()) continue;
+            if (p.getId() == botId) continue;
+            return true;
+        }
+        return false;
     }
 
     public void startTouchDamageSimulator(BotSession session) {

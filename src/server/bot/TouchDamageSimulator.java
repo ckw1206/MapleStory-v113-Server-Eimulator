@@ -35,14 +35,7 @@ public class TouchDamageSimulator implements Runnable {
 
         MapleMap map = bot.getMap();
 
-        boolean hasRealPlayer = false;
-        for (client.MapleCharacter chr : map.getCharacters()) {
-            if (!chr.isClone() && !chr.isHidden() && chr.getId() != bot.getId()) {
-                hasRealPlayer = true;
-                break;
-            }
-        }
-        if (!hasRealPlayer) {
+        if (!BotServer.hasRealPlayer(map, bot.getId())) {
             return;
         }
 

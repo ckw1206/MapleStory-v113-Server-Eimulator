@@ -119,6 +119,11 @@ public class BotSession {
             return;
         }
 
+        if (!BotServer.hasRealPlayer(bot.getMap(), bot.getId())) {
+            sendActionFailed(seq, "no_player_on_map");
+            return;
+        }
+
         // Dispatch to capability handlers
         String capKey = null;
         if ("move_to".equals(name) || "face".equals(name)) capKey = "movement";

@@ -26,6 +26,9 @@ public class BotCharacter {
         if (character.getMap() != null) {
             despawn();
         }
+        if (character.getStat().getHp() <= 0) {
+            character.getStat().setHp(character.getStat().getMaxHp());
+        }
         ChannelServer cs = ChannelServer.getInstance(client.getChannel());
         MapleMapFactory mf = cs.getMapFactory();
         MapleMap map = mf.getMap(mapId);
