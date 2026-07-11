@@ -52,3 +52,8 @@ tms.CPort         = 8596
 tms.IP            = 127.0.0.1
 tms.Packet        = false
 tms.Debug =
+
+# Bot WebSocket API
+tms.BotPort=9999
+tms.BotToken=changeme
+tms.BotCharacterId=1

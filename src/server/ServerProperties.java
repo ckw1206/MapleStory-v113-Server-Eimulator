@@ -53,4 +53,16 @@ public class ServerProperties {
     public static int getIntProperty(String s, String def) {
         return Integer.valueOf(props.getProperty(s, def));
     }
+
+    public static int getBotPort() {
+        return Integer.valueOf(props.getProperty("tms.BotPort", "9999"));
+    }
+
+    public static String getBotToken() {
+        return props.getProperty("tms.BotToken");
+    }
+
+    public static int getBotCharacterId() {
+        return Integer.valueOf(props.getProperty("tms.BotCharacterId", "1"));
+    }
 }
