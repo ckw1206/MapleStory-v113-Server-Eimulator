@@ -1,71 +1,53 @@
-subJob : https://www.youtube.com/watch?v=HJdmkR4R-TY
+# MapleStory v113 Server Emulator
 
-autoPotion : https://www.youtube.com/watch?v=VEEGS280PYQ
+台服 113 伺服器，原始來源為網路，更新為 Netty 架構。會不定時修正伺服器，至於 NPC 腳本有請大家補充，有任何 BUG 請善用 issues。
 
-warpRandomPos : https://www.youtube.com/watch?v=eklgL1Za0Wc
+## Quick start (Docker)
 
+Runs MySQL and the game server together, no local JDK required.
 
------------------------------------------------OLD README here
-# MapleStory-v113-server
+```sh
+make setup      # copy .env.example / Settings.ini.example if missing
+make docker-up  # build the server image, start MySQL + the server
+```
 
-##MIT License
+Edit `.env` and `Settings.ini` first if you need non-default credentials or world
+settings. If the server is running in Docker, set `tms.Url` in `Settings.ini` to use
+host `mysql` instead of `localhost` (see comment in `Settings.ini.example`) - it
+reaches the MySQL container over the compose network rather than the published port.
 
-可打賞
+Other targets: `make docker-down`, `make docker-logs`, `make docker-build` (rebuild
+after code changes). Run `make help` for the full list, including the native
+(non-Docker) `build`/`start`/`stop` flow.
 
-ETH 0x883d088c3a57b9e5a0e8db2c7665aaf38edb56f6
+## Requirements
 
+- Docker + Docker Compose, **or** JDK 8–14 (all dependencies ship as jars in `dist/`)
+  for the native flow. Not JDK 15+: the game scripts run on Nashorn, which was removed
+  from the JDK in Java 15. The Docker image uses Java 11.
 
-BTC 1CrP72HFkXV1QVRMWgbqde2nDVmLkez6PM
+## 目前已修正
 
-會不定時修正伺服器，至於NPC腳本有請大家補充，有任何BUG請善用issues
+1. 多人遊戲
+2. 廣播
+3. 商城
+4. 多數技能（召喚獸斷線、各式技能 BUFF 失效、異常斷線、海盜船生命、龍之獻技異常扣血）
+5. 修正部分計時器殘留問題
+6. 登入複製
+7. 釣魚
+8. 個人資料
+9. 部分商城消耗道具（AP、SP 捲，原地復活，高級卷...不一一列表）
+10. 宅配物品紀錄 15 日，超過 15 日將會刪除
+11. 經驗書
+12. 成長武器
+13. 時空門位置異常
+14. 微調封鎖機制
+15. 生命類御守（或許是錯誤的 Wz 檔）
+16. 騎寵疲勞度
+17. 火毒毒霧傷害
+18. 商城寵物技能
+19. 精靈商人留言功能
 
-更新為Netty架構
+## License
 
-##
-台服 113 伺服器
-
-原始來源為網路
-
-#目前已修正
-
-1.多人遊戲
-
-2.廣播
-
-3.商城
-
-4.多數技能(召喚獸斷線、各式技能BUFF失效、異常斷線、海盜船生命、龍之獻技異常扣血)
-
-5.修正部分計時器殘留問題
-
-6.登入複製
-
-7.釣魚
-
-8.個人資料
-
-9.部分商城消耗道具(AP、SP捲，原地復活，高級卷...不一一列表)
-
-10.宅配物品紀錄15日，超過15日將會刪除
-
-11.經驗書
-
-12.成長武器
-
-13.時空門位置異常
-
-14.微調封鎖機制
-
-15.生命類御守(或許是錯誤的Wz檔)
-
-16.騎寵疲勞度
-
-17.火毒毒霧傷害
-
-18.商城寵物技能
-
-19.精靈商人留言功能
-
-
-##使用Java8編譯
-=======
+MIT License.
