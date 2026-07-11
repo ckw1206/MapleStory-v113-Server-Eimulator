@@ -11,6 +11,7 @@ public class MovementHandler implements BotActionHandler {
     @Override
     public boolean handle(BotSession session, BotCharacter bot, String actionName, JsonObject args) {
         if ("move_to".equals(actionName)) {
+            if (!args.containsKey("x") || !args.containsKey("y")) return false;
             int x = args.getInt("x", 0);
             int y = args.getInt("y", 0);
             bot.moveTo(x, y);

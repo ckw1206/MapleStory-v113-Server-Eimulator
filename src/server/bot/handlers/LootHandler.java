@@ -48,7 +48,7 @@ public class LootHandler implements BotActionHandler {
                     item.getPosition());
             bot.getMap().removeMapObject(item);
         }
-        return true;
+        return added;
     }
 
     private boolean handleUseItem(BotCharacter bot, JsonObject args) {
@@ -70,13 +70,12 @@ public class LootHandler implements BotActionHandler {
         }
         if (found == null) return false;
 
-        MapleInventoryManipulator.removeById(chr.getClient(), invType, itemId, 1, false, false);
-
         MapleItemInformationProvider mmii = MapleItemInformationProvider.getInstance();
         MapleStatEffect itemEffect = mmii.getItemEffect(itemId);
-        if (itemEffect != null) {
-            itemEffect.applyTo(chr);
-        }
+        if (itemEffect == null) return false;
+
+        itemEffect.applyTo(chr);
+        MapleInventoryManipulator.removeById(chr.getClient(), invType, itemId, 1, false, false);
 
         return true;
     }

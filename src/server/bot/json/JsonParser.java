@@ -1,7 +1,6 @@
 /*
- * Minimal JSON parser — MIT License
- * https://github.com/ralfstx/minimal-json
- * Ported to single-file vendored form for bot API use.
+ * Minimal JSON parser — original implementation for bot API use.
+ * Supports: objects, arrays, strings, numbers, booleans, null.
  */
 package server.bot.json;
 

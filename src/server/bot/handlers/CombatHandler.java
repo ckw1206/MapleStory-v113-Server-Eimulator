@@ -24,10 +24,8 @@ public class CombatHandler implements BotActionHandler {
 
         if (!mob.isAlive()) return false;
 
-        // Derive damage from bot's own stats
-        client.PlayerStats ps = bot.getCharacter().getStat();
-        int baseDamage = Math.max(1, (ps.getTotalStr() + ps.getDex()) * 2 + ps.getTotalWatk());
-        int damage = baseDamage + Randomizer.nextInt(Math.max(1, baseDamage / 10));
+        float maxBase = bot.getCharacter().getStat().getCurrentMaxBaseDamage();
+        int damage = Math.max(1, (int) maxBase + Randomizer.nextInt(Math.max(1, (int) (maxBase / 10))));
 
         mob.damage(bot.getCharacter(), damage, true);
         return true;

@@ -4,6 +4,7 @@ import client.MapleCharacter;
 import client.MapleClient;
 import handling.channel.ChannelServer;
 import server.maps.MapleMap;
+import server.MaplePortal;
 import server.maps.MapleMapFactory;
 import tools.MockIOSession;
 import java.awt.Point;
@@ -24,6 +25,9 @@ public class BotCharacter {
         ChannelServer cs = ChannelServer.getInstance(client.getChannel());
         MapleMapFactory mf = cs.getMapFactory();
         MapleMap map = mf.getMap(mapId);
+        MaplePortal sp = map.getPortal(0);
+        character.setMap(map);
+        character.setPosition(sp.getPosition());
         map.addPlayer(character);
     }
 

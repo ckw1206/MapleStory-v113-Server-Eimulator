@@ -13,6 +13,7 @@ import server.ServerProperties;
 import server.Timer.EtcTimer;
 import server.bot.json.JsonValue;
 
+import java.net.URLDecoder;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
@@ -125,8 +126,23 @@ public class BotServer {
                 WebSocketServerProtocolHandler.HandshakeComplete hs =
                         (WebSocketServerProtocolHandler.HandshakeComplete) evt;
                 String query = hs.requestUri();
-                String token = ServerProperties.getBotToken();
-                if (token == null || !query.contains("token=" + token)) {
+                String expectedToken = ServerProperties.getBotToken();
+                if (expectedToken == null) {
+                    ctx.channel().close();
+                    return;
+                }
+                String providedToken = null;
+                if (query != null && query.indexOf('?') >= 0) {
+                    String qs = query.substring(query.indexOf('?') + 1);
+                    for (String param : qs.split("&")) {
+                        int eq = param.indexOf('=');
+                        if (eq > 0 && "token".equals(param.substring(0, eq))) {
+                            providedToken = URLDecoder.decode(param.substring(eq + 1), "UTF-8");
+                            break;
+                        }
+                    }
+                }
+                if (!expectedToken.equals(providedToken)) {
                     ctx.channel().close();
                     return;
                 }
