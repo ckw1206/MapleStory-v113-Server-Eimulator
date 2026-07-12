@@ -97,19 +97,34 @@ def main() -> None:
                     print(f"[sidecar] brain -> {brain_action['action']} seq={s}")
 
         elif msg_type == "event":
-            event_name = msg.get("data", {}).get("event", "")
-            brain.append_event(event_name)
+            event_data = msg.get("data", {})
+            event_name = event_data.get("event", "")
+            brain.append_event(event_data)
             if event_name == "died":
                 reflex.reset()
                 brain.reset()
                 current_state = None
             print(f"[sidecar] event: {event_name}")
 
-        elif msg_type in ("action_done", "action_failed"):
+        elif msg_type == "action_done":
             seq = msg.get("seq", 0)
             info = in_flight.pop(seq, None)
             action_name = info[0] if info else "?"
-            print(f"[sidecar] {msg_type}: seq={seq} action={action_name}")
+            print(f"[sidecar] action_done: seq={seq} action={action_name}")
+
+            if info and info[0] == "pickup":
+                drop_id = info[1].get("dropId")
+                if drop_id is not None:
+                    reflex.clear_in_flight(drop_id)
+
+        elif msg_type == "action_failed":
+            seq = msg.get("seq", 0)
+            info = in_flight.pop(seq, None)
+            action_name = info[0] if info else "?"
+            reason = msg.get("reason", "")
+            print(f"[sidecar] action_failed: seq={seq} action={action_name} reason={reason}")
+            if info:
+                brain.append_action_failed(action_name, reason)
 
             if info and info[0] == "pickup":
                 drop_id = info[1].get("dropId")

@@ -18,7 +18,7 @@ class Config:
 
     @staticmethod
     def load(path: str = "config.yaml") -> "Config":
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
         return Config(

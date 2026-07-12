@@ -184,3 +184,74 @@ def test_brain_retry_includes_error_feedback_in_messages():
     assert any("Invalid:" in c for c in second_user_contents), (
         f"Retry messages should contain 'Invalid:' feedback. Got: {second_messages}"
     )
+
+
+def test_append_event_chat_with_sender_and_text():
+    config = MagicMock()
+    config.base_url = "http://localhost:11434/v1"
+    config.api_key = "test"
+    config.model = "llama3"
+    config.memory_window = 20
+    config.persona = {"name": "TestBot", "greeting": "Hi"}
+
+    brain = Brain(config)
+    brain.append_event({"event": "chat", "senderName": "Kyle", "text": "hello world"})
+
+    assert any("Event: chat from Kyle: hello world" in m["content"] for m in brain.memory)
+
+
+def test_append_event_chat_text_only_no_sender():
+    config = MagicMock()
+    config.base_url = "http://localhost:11434/v1"
+    config.api_key = "test"
+    config.model = "llama3"
+    config.memory_window = 20
+    config.persona = {"name": "TestBot", "greeting": "Hi"}
+
+    brain = Brain(config)
+    brain.append_event({"event": "chat", "text": "hi"})
+
+    assert any("Event: chat" in m["content"] for m in brain.memory)
+
+
+def test_append_event_bare_event():
+    config = MagicMock()
+    config.base_url = "http://localhost:11434/v1"
+    config.api_key = "test"
+    config.model = "llama3"
+    config.memory_window = 20
+    config.persona = {"name": "TestBot", "greeting": "Hi"}
+
+    brain = Brain(config)
+    brain.append_event({"event": "died"})
+
+    assert any(m["content"] == "Event: died" for m in brain.memory)
+
+
+def test_append_event_generic_with_extra_fields():
+    config = MagicMock()
+    config.base_url = "http://localhost:11434/v1"
+    config.api_key = "test"
+    config.model = "llama3"
+    config.memory_window = 20
+    config.persona = {"name": "TestBot", "greeting": "Hi"}
+
+    brain = Brain(config)
+    brain.append_event({"event": "mob_killed", "mobId": 100, "mobName": "Snail"})
+
+    content = next(m["content"] for m in brain.memory if "Event: mob_killed" in m["content"])
+    assert "mobId=100" in content or "mobName=Snail" in content
+
+
+def test_append_action_failed_stores_failure_in_memory():
+    config = MagicMock()
+    config.base_url = "http://localhost:11434/v1"
+    config.api_key = "test"
+    config.model = "llama3"
+    config.memory_window = 20
+    config.persona = {"name": "TestBot", "greeting": "Hi"}
+
+    brain = Brain(config)
+    brain.append_action_failed("say", "no_player_on_map")
+
+    assert any(m["content"] == "Action say failed: no_player_on_map" for m in brain.memory)

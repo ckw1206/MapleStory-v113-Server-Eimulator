@@ -6,8 +6,13 @@ import handling.channel.ChannelServer;
 import server.maps.MapleMap;
 import server.MaplePortal;
 import server.maps.MapleMapFactory;
+import server.movement.LifeMovementFragment;
+import server.movement.StaticLifeMovement;
+import tools.MaplePacketCreator;
 import tools.MockIOSession;
 import java.awt.Point;
+import java.util.Collections;
+import java.util.List;
 
 public class BotCharacter {
 
@@ -43,7 +48,21 @@ public class BotCharacter {
     }
 
     public void moveTo(int x, int y) {
-        character.getMap().movePlayer(character, new Point(x, y));
+        Point newPos = new Point(x, y);
+        Point oldPos = character.getPosition();
+
+        StaticLifeMovement movement = new StaticLifeMovement(0, newPos, 0, 1, 0);
+        movement.defaulted();
+        movement.setPixelsPerSecond(new Point(0, 0));
+
+        List<LifeMovementFragment> moves = Collections.singletonList(movement);
+
+        character.getMap().broadcastMessage(
+                character,
+                MaplePacketCreator.movePlayer(character.getId(), moves, oldPos),
+                false);
+
+        character.getMap().movePlayer(character, newPos);
     }
 
     public Point getPosition() {

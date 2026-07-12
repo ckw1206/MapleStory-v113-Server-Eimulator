@@ -4,6 +4,10 @@ from config import Config
 from intent_schema import INTENT_SCHEMA, ValidationError, validate_response
 from persona import SYSTEM_PROMPT, compress_state
 
+_CHAT_FORMATS = {
+    "chat": "Event: chat from {senderName}: {text}",
+}
+
 
 class Brain:
     def __init__(self, config: Config):
@@ -53,8 +57,25 @@ class Brain:
         )
         return validate_response(response)
 
-    def append_event(self, event_name: str) -> None:
-        self.memory.append({"role": "system", "content": f"Event: {event_name}"})
+    def append_event(self, data: Dict[str, Any]) -> None:
+        event_name = data.get("event", "")
+        fmt = _CHAT_FORMATS.get(event_name)
+        if fmt:
+            try:
+                content = fmt.format(**data)
+            except (KeyError, TypeError):
+                content = f"Event: {event_name}"
+        else:
+            extra = ", ".join(f"{k}={v}" for k, v in data.items() if k != "event")
+            if extra:
+                content = f"Event: {event_name} ({extra})"
+            else:
+                content = f"Event: {event_name}"
+        self.memory.append({"role": "system", "content": content})
+        self._trim_memory()
+
+    def append_action_failed(self, action_name: str, reason: str) -> None:
+        self.memory.append({"role": "system", "content": f"Action {action_name} failed: {reason}"})
         self._trim_memory()
 
     def reset(self) -> None:

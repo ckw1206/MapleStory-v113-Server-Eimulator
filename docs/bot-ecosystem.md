@@ -6,6 +6,10 @@ native Mermaid support.
 
 Status: Phase 2 done (see issue #3). Spec: `docs/superpowers/specs/2026-07-11-bot-mcp-skill-design.md` (local).
 
+Field-by-field wire format, the full action/event catalog, bot-sidecar's
+interface (not covered below), and the current known-bugs list live in
+[`bot-interface-spec.md`](bot-interface-spec.md).
+
 ## Component map
 
 ```mermaid
