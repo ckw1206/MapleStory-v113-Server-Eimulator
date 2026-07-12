@@ -67,7 +67,7 @@ def test_snapshot_updates_store(client):
 
 def test_chat_event_fills_history_and_ring(client):
     client._on_message(None, json.dumps(
-        {"type": "event", "event": "chat", "data": {"senderId": 2, "senderName": "kyle", "text": "hi"}}))
+        {"type": "event", "data": {"event": "chat", "senderId": 2, "senderName": "kyle", "text": "hi"}}))
     assert client.store.chat_history()[0]["sender"] == "kyle"
     assert client.store.drain_events()[0]["event"] == "chat"
 
@@ -90,3 +90,19 @@ def test_reflex_skips_above_threshold_and_when_dead(client):
     client._on_message(None, json.dumps({"type": "snapshot", "data": {"hp": 0, "maxHp": 500}}))
     time.sleep(0.3)
     assert client._ws.sent == []
+
+def test_reflex_backs_off_on_failure(client):
+    client._on_message(None, json.dumps({"type": "snapshot", "data": {"hp": 100, "maxHp": 500}}))
+    assert client._ws.sent_signal.wait(2.0)
+    seq = client._ws.sent[0]["seq"]
+    client._on_message(None, json.dumps({"type": "action_failed", "seq": seq, "reason": "no_player_on_map"}))
+    for _ in range(10):
+        if client._potion_failures == 1:
+            break
+        time.sleep(0.05)
+    assert client._potion_failures == 1
+    client._ws.sent.clear()
+    client._ws.sent_signal.clear()
+    client._on_message(None, json.dumps({"type": "snapshot", "data": {"hp": 100, "maxHp": 500}}))
+    time.sleep(0.3)
+    assert not any(m["action"] == "use_item" for m in client._ws.sent)

@@ -25,6 +25,7 @@ class BotClient:
         self._connected = threading.Event()
         self._stop = False
         self._last_potion = 0.0
+        self._potion_failures = 0
 
     # ---- public API ----
 
@@ -99,8 +100,8 @@ class BotClient:
             self.store.update_snapshot(snap)
             self._reflex(snap)
         elif mtype == "event":
-            name = msg.get("event", "")
             data = msg.get("data") or {}
+            name = data.get("event", "")
             if name == "chat":
                 self.store.add_chat(data.get("senderName", "?"), data.get("text", ""))
             if name == "died":
@@ -122,13 +123,21 @@ class BotClient:
         if max_hp <= 0 or hp <= 0:
             return
         if hp > max_hp * self.cfg["hp_threshold"]:
+            self._potion_failures = 0
             return
         now = time.monotonic()
-        if now - self._last_potion < POTION_COOLDOWN_S:
+        backoff = POTION_COOLDOWN_S * (2 ** min(self._potion_failures, 4))
+        if now - self._last_potion < backoff:
             return
         self._last_potion = now
-        threading.Thread(
-            target=self.send_action,
-            args=("use_item", {"itemId": self.cfg["potion_item_id"]}),
-            daemon=True,
-        ).start()
+        potion_item_id = self.cfg["potion_item_id"]
+
+        def _potion_thread():
+            result = self.send_action("use_item", {"itemId": potion_item_id}, timeout=3.0)
+            if result["status"] != "success":
+                log.warning("potion failed [%s]; backing off", result.get("reason", ""))
+                self._potion_failures += 1
+            else:
+                self._potion_failures = 0
+
+        threading.Thread(target=_potion_thread, daemon=True).start()

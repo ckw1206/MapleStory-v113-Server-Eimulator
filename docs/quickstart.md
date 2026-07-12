@@ -85,6 +85,21 @@ pip install -r requirements.txt
 cp config.yaml.example config.yaml   # set token (= tms.BotToken), spawn map, potion id
 ```
 
+Verify before wiring it into a harness — unit tests (no server needed), then an
+end-to-end smoke test over real MCP stdio against the running server (needs
+`docker compose up -d`, a seeded bot char, and a real token in `config.yaml`):
+
+```sh
+cd bot-mcp
+python -m pytest tests/ -x -q                # unit: chat filter, state, ws_client, tools
+python tests/integration/smoke_mcp.py         # e2e: tool surface, perceive, wait, chat filter
+```
+
+The integration script prints `SMOKE OK` on success. Actions that require a real
+player present (`move_to`/`attack`/`pickup` actually executing, `chat`/`mob_killed`/
+`damaged` events, reflex potion under real damage) report as gated (`no_player_on_map`)
+unless a game client is logged into the bot's spawn map at the time.
+
 Then register it as a stdio MCP server in your harness, e.g. Claude Code:
 
 ```sh

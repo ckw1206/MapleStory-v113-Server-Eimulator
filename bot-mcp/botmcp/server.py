@@ -106,7 +106,14 @@ def perform_act(client, action: str, x: int | None = None, y: int | None = None,
         results.append((action, {"status": "failed", "reason": f"unknown_action: {action}"}))
 
     failures = [f"{name}: {r['reason']}" for name, r in results if r["status"] != "success"]
-    return {"status": "failed" if failures else "success", "reason": "; ".join(failures)}
+    parts = {name: r for name, r in results}
+    if failures and len(failures) < len(results):
+        status = "partial"
+    elif failures:
+        status = "failed"
+    else:
+        status = "success"
+    return {"status": status, "parts": parts, "reason": "; ".join(failures)}
 
 
 def main():
@@ -127,7 +134,9 @@ def main():
                 target_oid: int | None = None, item_id: int | None = None,
                 chat_message: str | None = None, emote: str | None = None) -> dict:
         """One game turn. action: idle | move_to(x,y) | attack(target_oid) | pickup(target_oid) | use_item(item_id).
-        Optional chat_message (map chat, ~70 bytes max) and emote (F1-F7). Order: say -> emote -> action."""
+        Optional chat_message (map chat, ~70 bytes max) and emote (F1-F7). Order: say -> emote -> action.
+        Returns {status, parts, reason} where status is 'success' | 'partial' | 'failed'.
+        'partial' means some sub-actions succeeded and some failed; parts is {name: result}."""
         return perform_act(client, action, x=x, y=y, target_oid=target_oid,
                            item_id=item_id, chat_message=chat_message, emote=emote)
 

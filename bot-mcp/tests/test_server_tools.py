@@ -63,7 +63,10 @@ def test_act_fanout_order_say_face_action():
     assert c.calls[0][1] == {"text": "打死你"}
     assert c.calls[1][1] == {"expressionId": 3}
     assert c.calls[2][1] == {"mobId": 7}
-    assert r == {"status": "success", "reason": ""}
+    assert r["status"] == "success"
+    assert r["parts"]["say"] == {"status": "success", "reason": ""}
+    assert r["parts"]["face"] == {"status": "success", "reason": ""}
+    assert r["parts"]["attack"] == {"status": "success", "reason": ""}
 
 def test_act_arg_mapping():
     c = DummyClient()
@@ -90,11 +93,37 @@ def test_act_blocked_chat_still_runs_action():
     c = DummyClient()
     r = perform_act(c, "idle", chat_message="@gm hello")
     assert c.calls == [("idle", {})]        # say never sent
-    assert r["status"] == "failed"
-    assert "blocked_prefix" in r["reason"]
+    assert r["status"] == "partial"
+    assert r["parts"]["say"]["status"] == "failed"
+    assert "blocked_prefix" in r["parts"]["say"]["reason"]
+    assert r["parts"]["idle"] == {"status": "success", "reason": ""}
 
 def test_act_aggregates_failures():
     c = DummyClient(fail_actions={"attack"})
     r = perform_act(c, "attack", target_oid=7, chat_message="hi")
-    assert r["status"] == "failed"
+    assert r["status"] == "partial"
+    assert r["parts"]["say"]["status"] == "success"
+    assert r["parts"]["attack"]["status"] == "failed"
     assert "attack_boom" in r["reason"]
+
+
+def test_perform_act_all_fail_is_failed():
+    c = DummyClient(fail_actions={"move_to", "say"})
+    r = perform_act(c, "move_to", x=0, y=0, chat_message="x")
+    assert r["status"] == "failed"
+    assert r["parts"]["say"]["status"] == "failed"
+    assert r["parts"]["move_to"]["status"] == "failed"
+
+
+def test_perform_act_all_success_is_success():
+    c = DummyClient()
+    r = perform_act(c, "move_to", x=10, y=-5)
+    assert r["status"] == "success"
+    assert r["parts"]["move_to"]["status"] == "success"
+
+
+def test_perform_act_partial_when_mixed():
+    c = DummyClient(fail_actions={"face"})
+    r = perform_act(c, "idle", emote="F1")
+    assert r["status"] == "partial"
+    assert r["parts"]["face"]["status"] == "failed"
