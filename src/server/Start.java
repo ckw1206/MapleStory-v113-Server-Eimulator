@@ -20,6 +20,7 @@ import server.Timer.*;
 import server.events.MapleOxQuizFactory;
 import server.life.MapleLifeFactory;
 import server.quest.MapleQuest;
+import server.bot.BotServer;
 
 public class Start {
 
@@ -77,6 +78,7 @@ public class Start {
         SpeedRunner.getInstance().loadSpeedRuns();
         World.registerRespawn();
         LoginServer.setOn();
+        BotServer.getInstance().start();
         System.out.println("載入完成 :::");
         System.out.println("啟動時間: " + tools.StringUtil.getReadableMillis(originStartTime, System.currentTimeMillis()));
         ChannelServer.loadEventScriptManager(); // 啟動完成後再載入活動

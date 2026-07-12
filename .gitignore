@@ -1,6 +1,23 @@
+# Python
+**/__pycache__/
+
+# Compiled output
+*.class
+
+# Runtime data
 Logs/
 wz/
 *.ini
-.env
 .server.pid
-*.class
+
+# Local config & secrets
+.env
+opencode.json
+Settings.ini
+
+# Local docs
+docs/superpowers/
+
+# bot-mcp
+bot-mcp/config.yaml
+bot-mcp/.venv/

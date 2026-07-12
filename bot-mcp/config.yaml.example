@@ -1,0 +1,6 @@
+ws_url: ws://127.0.0.1:9999/ws
+token: changeme            # = tms.BotToken in Settings.ini
+spawn_map_id: 100000000    # Henesys
+potion_item_id: 2000002    # White Potion (must exist in the bot char's USE inventory)
+hp_threshold: 0.40         # reflex potions at hp <= max_hp * threshold
+persona: ""                # free text, consumed by the companion skill (Phase 3)

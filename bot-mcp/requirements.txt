@@ -1,0 +1,4 @@
+mcp>=1.2
+websocket-client>=1.6
+PyYAML>=6.0
+pytest>=8.0

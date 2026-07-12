@@ -8,6 +8,7 @@ import handling.channel.ChannelServer;
 import handling.login.LoginServer;
 import handling.world.World;
 import server.Timer.*;
+import server.bot.BotServer;
 
 public class ShutdownServer implements Runnable {
 
@@ -64,6 +65,7 @@ public class ShutdownServer implements Runnable {
         EventTimer.getInstance().stop();
         EtcTimer.getInstance().stop();
         PingTimer.getInstance().stop();
+        BotServer.getInstance().stop();
 
         try {
             Thread.sleep(5000);
